@@ -1,6 +1,6 @@
-<div style="display: flex; align-items: center; justify-content: center;">
-    <img src="assets/icon.png" height="70" width="70" style="display: inline-flex">
-    <h1 style="padding-left: 15px; display: inline-flex">Soundcloud Extension</h1>
+<div>
+    <img src="assets/icon.png" height="70" width="70" align="left">
+    <h1">Soundcloud Extension</h1>
 </div>
 
 This is a simple extension that adds a download button to Soundcloud pages.
