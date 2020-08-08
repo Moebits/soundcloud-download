@@ -1,0 +1,60 @@
+.sc-download-button {
+    background-color: transparent;
+    display: flex;
+    height: 26px;
+    padding: 2px 5px;
+    border: 1px solid #ff8c20;
+    border-radius: 3px;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.sc-download-button:focus {
+    outline: none;
+}
+
+.sc-download-button:hover {
+    filter: brightness(75%) hue-rotate(-20deg) saturate(150%);
+}
+
+.sc-download-img {
+    height: 18px;
+    width: auto;
+}
+
+.sc-download-text {
+    color: #ff8c20;
+    font-family: Interstate, Lucida Grande, Lucida Sans Unicode, Lucida Sans,Garuda, Verdana, Tahoma, sans-serif;
+    font-weight: 100;
+    text-align: center;
+    font-size: 12px;
+}
+
+/*
+@media (max-width: 1239px) {
+    .sc-download-button {
+        padding: 2px 2px;
+    }
+    .sc-download-text {
+        display: none;
+    }
+}
+*/
+
+.sc-ext-enable-container {
+    display: flex;
+    align-items: center;
+    height: 15px;
+}
+
+.sc-ext-enable-text {
+    color: #ff8c20;
+}
+
+.sc-ext-enable-text:hover {
+    color: #ff2020;
+}
+
+.sc-ext-enable-checkbox {
+    filter: hue-rotate(160deg) brightness(240%);
+}
