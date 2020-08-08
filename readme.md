@@ -1,8 +1,8 @@
 <img src="assets/icon.png" height="70" width="70" align="left">
 <h1>Soundcloud Extension</h1>
-<br>
+<br/>
 This is a simple extension that adds a download button to Soundcloud pages.
-
+<br/>
 <img src="assets/example.png">
 
 #### Features:
