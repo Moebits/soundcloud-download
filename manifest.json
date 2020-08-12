@@ -2,12 +2,12 @@
     "manifest_version": 2,
     "name": "Soundcloud Download",
     "description": "This extension will let you download any track from Soundcloud.",
-    "version": "0.1",
+    "version": "0.1.3",
     "content_scripts": [
         {"matches": ["https://*.soundcloud.com/*"], "css": ["styles.css"], "js": ["content-script.js"]}
     ],
     "background": {
-        "scripts": ["background.js", "browser-id3-writer.js"],
+        "scripts": ["browser-id3-writer.js", "background.js"],
         "persistent": true
     },
     "browser_action": {
@@ -21,7 +21,7 @@
     },
     "permissions": [
      "activeTab",
-     "<all_urls>",
+     "https://*.soundcloud.com/*",
      "webRequest",
      "downloads",
      "webNavigation"
@@ -29,7 +29,7 @@
      "web_accessible_resources": ["assets/*"],
      "browser_specific_settings": {
         "gecko": {
-            "id": "soundcloud-download@id.moe"
+            "id": "{3c7e16e0-d027-48ee-a9b4-97abaf51b8fd}"
         }
     }
   }

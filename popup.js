@@ -3,17 +3,17 @@ const state = localStorage.getItem("sc-ext-state")
 if (state && state === "false") checkBox.checked = false
 
 if (checkBox.checked) {
-    chrome.runtime.sendMessage({message: "set-state", state: true})
+    browser.runtime.sendMessage({message: "set-state", state: true})
 } else {
-    chrome.runtime.sendMessage({message: "set-state", state: false})
+    browser.runtime.sendMessage({message: "set-state", state: false})
 }
 
 checkBox.onclick = () => {
     if (checkBox.checked) {
-        chrome.runtime.sendMessage({message: "set-state", state: true})
+        browser.runtime.sendMessage({message: "set-state", state: true})
         localStorage.setItem("sc-ext-state", "true")
     } else {
-        chrome.runtime.sendMessage({message: "set-state", state: false})
+        browser.runtime.sendMessage({message: "set-state", state: false})
         localStorage.setItem("sc-ext-state", "false")
     }
 }

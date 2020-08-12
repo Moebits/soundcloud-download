@@ -16,3 +16,7 @@ Sometimes you may need to refresh the page in order for the button to show up.
 
 #### Bugs/Feature Requests:
 You can open an issue on my github repository here: https://github.com/Tenpi/soundcloud-extension
+
+#### Extension Pages:
+Firefox: https://addons.mozilla.org/en-US/firefox/addon/sc-download/
+
