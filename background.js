@@ -77,7 +77,7 @@ const setIcon = () => {
 chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
     if (request.message === "track-clicked") {
       const track = await fetch(trackURL).then(r => r.json())
-      const writerURL = getDownloadURL(track)
+      const writerURL = await getDownloadURL(track)
       chrome.downloads.download({url: writerURL, filename: `${track.title}.mp3`, conflictAction: "overwrite"})
     }
 

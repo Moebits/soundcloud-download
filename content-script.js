@@ -53,7 +53,10 @@ const track = () => {
     if (!buttons) return
     const button = appendButton(buttons)
     if (window.location.href.includes("/sets")) return playlist(button)
-    if (window.location.href.match(/(?<=soundcloud.com\/)(.*)(?<!\/)$/)) return user(button)
+    const urlBit = window.location.href.match(/(?<=soundcloud.com\/)(.*)(?<!\/)$/)?.[0]
+    if (!urlBit.includes("/")) {
+        return user(button)
+    }
     button.onclick = () => {
         chrome.runtime.sendMessage({message: "track-clicked"})
     }
@@ -63,7 +66,7 @@ const main = () => {
     setTimeout(track, 100)
     chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
         if (request.message == "history-change") {
-            chrome.extension.sendMessage({message: "get-state"}, (response) => {
+            chrome.runtime.sendMessage({message: "get-state"}, (response) => {
                 if (response !== true) return  
                 setTimeout(track, 100)
             })
@@ -75,7 +78,7 @@ const removeBoxes = () => {
     document.querySelectorAll(".sc-download-button").forEach((b) => b.remove())
 }
 
-chrome.extension.sendMessage({message: "get-state"}, (response) => {
+chrome.runtime.sendMessage({message: "get-state"}, (response) => {
     if (response !== true) return  
     main()
 })
