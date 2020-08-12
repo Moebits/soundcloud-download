@@ -26,5 +26,10 @@
      "downloads",
      "webNavigation"
      ],
-     "web_accessible_resources": ["assets/*"]
+     "web_accessible_resources": ["assets/*"],
+     "browser_specific_settings": {
+        "gecko": {
+            "id": "soundcloud-download@id.moe"
+        }
+    }
   }
