@@ -2,7 +2,7 @@
     "manifest_version": 2,
     "name": "Soundcloud Download",
     "description": "This extension will let you download any track from Soundcloud.",
-    "version": "0.1.4",
+    "version": "0.1.5",
     "content_scripts": [
         {"matches": ["https://*.soundcloud.com/*"], "css": ["styles.css"], "js": ["content-script.js"]}
     ],
@@ -24,7 +24,8 @@
      "https://*.soundcloud.com/*",
      "webRequest",
      "downloads",
-     "webNavigation"
+     "webNavigation",
+     "storage"
      ],
      "web_accessible_resources": ["assets/*"],
      "browser_specific_settings": {

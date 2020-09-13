@@ -116,15 +116,11 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
     }
 
     if (request.message === "set-state") {
-      extensionEnabled = request.state
+      extensionEnabled = request.state === "on" ? true : false
       setIcon()
       chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
-        chrome.tabs.sendMessage(tabs[0].id, {message: "update-state", state: extensionEnabled})
+        chrome.tabs.sendMessage(tabs[0].id, {message: "update-state", state: request.state})
       })
-    }
-
-    if (request.message === "get-state") {
-      sendResponse(extensionEnabled)
     }
 })
 

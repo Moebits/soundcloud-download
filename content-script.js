@@ -76,10 +76,12 @@ const track = () => {
 const main = () => {
     setTimeout(track, 100)
     chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
-        if (request.message == "history-change") {
-            chrome.runtime.sendMessage({message: "get-state"}, (response) => {
-                if (response !== true) return  
-                setTimeout(track, 100)
+        if (request.message == "history-change") {   
+            chrome.storage.sync.get("state", (result) => {
+                if (!result || result.state === "on") {
+                    chrome.runtime.sendMessage({message: "set-state", state: "on"})
+                    setTimeout(track, 100)
+                }
             })
         }
     })
@@ -95,14 +97,9 @@ const clearButton = (buttonGroup) => {
     buttonGroup.querySelector(".sc-download-spinner-container")?.remove()
 }
 
-chrome.runtime.sendMessage({message: "get-state"}, (response) => {
-    if (response !== true) return  
-    main()
-})
-
 chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
     if (request.message === "update-state") {
-        if (request.state === false) {
+        if (request.state === "off") {
             removeButtons()
         } else {
             main()
@@ -112,8 +109,11 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
     }
 })
 
-const state = localStorage.getItem("sc-ext-state")
-if (!state) {
-    chrome.runtime.sendMessage({message: "set-state", state: true})
-    main()
-}
+chrome.storage.sync.get("state", (result) => {
+    console.log(result)
+    if (!result || result.state === "on") {
+        chrome.runtime.sendMessage({message: "set-state", state: "on"})
+        main()
+    }
+})
+    
