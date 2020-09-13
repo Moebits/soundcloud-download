@@ -58,3 +58,15 @@
 .sc-ext-enable-checkbox {
     filter: hue-rotate(160deg) brightness(240%);
 }
+
+.sc-download-spinner-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 70px;
+}
+
+.sc-download-spinner {
+    width: auto;
+    height: 20px;
+}

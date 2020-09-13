@@ -1,10 +1,3 @@
-const injectScript = (url) => {
-    const script = document.createElement("script")
-    script.setAttribute("src", url)
-    const head = document.head || document.getElementsByTagName("head")[0] || document.documentElement
-    head.insertBefore(script, head.lastChild)
-}
-
 const arrayIncludes = (string, array) => {
     for (let i = 0; i < array.length; i++) {
         if (string.includes(array[i])) return true
@@ -13,6 +6,8 @@ const arrayIncludes = (string, array) => {
 }
 
 const appendButton = (buttonGroup) => {
+    if (!buttonGroup) buttonGroup = document.querySelector(".sc-button-group")
+    clearButton(buttonGroup)
     const button = document.createElement("button")
     const img = document.createElement("img")
     const text = document.createElement("span")
@@ -28,15 +23,30 @@ const appendButton = (buttonGroup) => {
     return button
 }
 
+const appendSpinner = (buttonGroup) => {
+    if (!buttonGroup) buttonGroup = document.querySelector(".sc-button-group")
+    clearButton(buttonGroup)
+    const div = document.createElement("div")
+    const img = document.createElement("img")
+    div.classList.add("sc-download-spinner-container")
+    img.classList.add("sc-download-spinner")
+    img.src = chrome.extension.getURL("assets/loading.gif")
+    buttonGroup.appendChild(div)
+    div.appendChild(img)
+    return div
+}
+
 const playlist = (button) => {
     button.onclick = () => {
         chrome.runtime.sendMessage({message: "playlist-clicked"})
+        appendSpinner()
     }
 }
 
 const user = (button) => {
     button.onclick = () => {
         chrome.runtime.sendMessage({message: "user-clicked"})
+        appendSpinner()
     }
 }
 
@@ -59,6 +69,7 @@ const track = () => {
     }
     button.onclick = () => {
         chrome.runtime.sendMessage({message: "track-clicked"})
+        appendSpinner()
     }
 }
 
@@ -74,8 +85,14 @@ const main = () => {
     })
 }
 
-const removeBoxes = () => {
+const removeButtons = () => {
     document.querySelectorAll(".sc-download-button").forEach((b) => b.remove())
+    document.querySelectorAll(".sc-download-spinner-container").forEach((b) => b.remove())
+}
+
+const clearButton = (buttonGroup) => {
+    buttonGroup.querySelector(".sc-download-button")?.remove()
+    buttonGroup.querySelector(".sc-download-spinner-container")?.remove()
 }
 
 chrome.runtime.sendMessage({message: "get-state"}, (response) => {
@@ -84,12 +101,19 @@ chrome.runtime.sendMessage({message: "get-state"}, (response) => {
 })
 
 chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
-    if (request.message == "update-state") {
+    if (request.message === "update-state") {
         if (request.state === false) {
-            removeBoxes()
+            removeButtons()
         } else {
             main()
         }
+    } else if (request.message === "download-stopped") {
+        track()
     }
 })
 
+const state = localStorage.getItem("sc-ext-state")
+if (!state) {
+    chrome.runtime.sendMessage({message: "set-state", state: true})
+    main()
+}

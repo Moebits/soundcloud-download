@@ -43,21 +43,21 @@ const getDownloadURL = async (track, album) => {
     const arrayBuffer = await fetch(mp3).then((r) => r.arrayBuffer())
     const writer = new ID3Writer(arrayBuffer)
     writer.setFrame("TIT2", track.title)
-          .setFrame("TPE1", [track.user.username])
-          .setFrame("TLEN", track.duration)
-          .setFrame("TYER", new Date(track.created_at).getFullYear())
-          .setFrame("TCON", [track.genre])
-          .setFrame("COMM", {
-            description: "Description",
-            text: track.description,
-            language: "eng"
-          })
-          .setFrame("APIC", {
-            type: 3,
-            data: imageBuffer,
-            description: track.title,
-            useUnicodeEncoding: false
+        .setFrame("TPE1", [track.user.username])
+        .setFrame("TLEN", track.duration)
+        .setFrame("TYER", new Date(track.created_at).getFullYear())
+        .setFrame("TCON", [track.genre])
+        .setFrame("COMM", {
+          description: "Description",
+          text: track.description,
+          language: "eng"
         })
+        .setFrame("APIC", {
+          type: 3,
+          data: imageBuffer,
+          description: track.title,
+          useUnicodeEncoding: false
+      })
     if (album) {
       writer.setFrame("TALB", album)
             .setFrame("TPE2", track.user.username)
@@ -77,8 +77,11 @@ const setIcon = () => {
 chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
     if (request.message === "track-clicked") {
       const track = await fetch(trackURL).then(r => r.json())
-      const writerURL = await getDownloadURL(track)
-      chrome.downloads.download({url: writerURL, filename: `${track.title}.mp3`, conflictAction: "overwrite"})
+      const url = await getDownloadURL(track)
+      chrome.downloads.download({url, filename: `${track.title}.mp3`, conflictAction: "overwrite"})
+      chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
+        chrome.tabs.sendMessage(tabs[0].id, {message: "download-stopped"})
+      })
     }
 
     if (request.message === "user-clicked") {
@@ -93,6 +96,9 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
       for (let i = 0; i < urlArray.length; i++) {
         chrome.downloads.download({url: urlArray[i], filename: `${trackArray[i].title}.mp3`, conflictAction: "overwrite"})
       }
+      chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
+        chrome.tabs.sendMessage(tabs[0].id, {message: "download-stopped"})
+      })
     }
 
     if (request.message === "playlist-clicked") {
@@ -104,6 +110,9 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
       for (let i = 0; i < urlArray.length; i++) {
         chrome.downloads.download({url: urlArray[i], filename: `${playlist.tracks[i].title}.mp3`, conflictAction: "overwrite"})
       }
+      chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
+        chrome.tabs.sendMessage(tabs[0].id, {message: "download-stopped"})
+      })
     }
 
     if (request.message === "set-state") {

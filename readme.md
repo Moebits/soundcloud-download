@@ -19,4 +19,3 @@ You can open an issue on my github repository here: https://github.com/Tenpi/sou
 
 #### Extension Pages:
 Firefox: https://addons.mozilla.org/en-US/firefox/addon/sc-download/
-
