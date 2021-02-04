@@ -7,6 +7,12 @@
     border-radius: 3px;
     justify-content: space-between;
     align-items: center;
+    margin-left: 3px;
+}
+
+.sc-download-button-small {
+    height: 20px;
+    padding: 2px 3px;
 }
 
 .sc-download-button:focus {
@@ -22,6 +28,11 @@
     width: auto;
 }
 
+.sc-download-img-small {
+    height: 14px;
+    width: auto;
+}
+
 .sc-download-text {
     color: #ff8c20;
     font-family: Interstate, Lucida Grande, Lucida Sans Unicode, Lucida Sans,Garuda, Verdana, Tahoma, sans-serif;
@@ -30,16 +41,13 @@
     font-size: 12px;
 }
 
-/*
-@media (max-width: 1239px) {
-    .sc-download-button {
-        padding: 2px 2px;
-    }
-    .sc-download-text {
-        display: none;
-    }
+.sc-download-text-small {
+    font-size: 11px;
 }
-*/
+
+.sc-download-text-hide {
+    display: none;
+}
 
 .sc-ext-enable-container {
     display: flex;
@@ -64,6 +72,10 @@
     justify-content: center;
     align-items: center;
     width: 70px;
+}
+
+.sc-download-spinner-small {
+    width: 30px;
 }
 
 .sc-download-spinner {

@@ -75,18 +75,24 @@ const setIcon = () => {
 }
 
 chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
-    if (request.message === "track-clicked") {
-      const track = await fetch(trackURL).then(r => r.json())
+    if (request.message === "download-track") {
+      const track = request.track
       const url = await getDownloadURL(track)
       chrome.downloads.download({url, filename: `${track.title}.mp3`, conflictAction: "overwrite"})
-      chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
-        chrome.tabs.sendMessage(tabs[0].id, {message: "download-stopped"})
-      })
+      if (request.href) {
+        chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
+          chrome.tabs.sendMessage(tabs[0].id, {message: "clear-spinner", href: request.href})
+        })
+      } else {
+        chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
+          chrome.tabs.sendMessage(tabs[0].id, {message: "download-stopped", id: request.id})
+        })
+      }
     }
 
-    if (request.message === "user-clicked") {
+    if (request.message === "download-user") {
       const trackArray = []
-      let user = await fetch(userURL).then(r => r.json())
+      let user = await fetch(`https://api-v2.soundcloud.com/users/${request.user.id}/tracks?client_id=${clientID}&limit=100`).then(r => r.json())
       trackArray.push(...user.collection)
       while (user.next_href) {
         user = await fetch(`${user.next_href}&client_id=${clientID}`).then(r => r.json())
@@ -97,22 +103,28 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
         chrome.downloads.download({url: urlArray[i], filename: `${trackArray[i].title}.mp3`, conflictAction: "overwrite"})
       }
       chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
-        chrome.tabs.sendMessage(tabs[0].id, {message: "download-stopped"})
+        chrome.tabs.sendMessage(tabs[0].id, {message: "download-stopped", id: request.id})
       })
     }
 
-    if (request.message === "playlist-clicked") {
-      const playlist = await fetch(playlistURL).then(r => r.json())
+    if (request.message === "download-playlist") {
+      const playlist = request.playlist
       for (let i = 0; i < playlist.tracks.length; i++) {
-        if (!playlist.tracks[i].media) playlist.tracks[i]= await fetch(`https://api-v2.soundcloud.com/tracks/soundcloud:tracks:${playlist.tracks[i].id}?client_id=${clientID}`).then(r => r.json())
+        if (!playlist.tracks[i].media) playlist.tracks[i] = await fetch(`https://api-v2.soundcloud.com/tracks/soundcloud:tracks:${playlist.tracks[i].id}?client_id=${clientID}`).then(r => r.json())
       }
       const urlArray = await Promise.all(playlist.tracks.map((t) => getDownloadURL(t, playlist.title)))
       for (let i = 0; i < urlArray.length; i++) {
         chrome.downloads.download({url: urlArray[i], filename: `${playlist.tracks[i].title}.mp3`, conflictAction: "overwrite"})
       }
-      chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
-        chrome.tabs.sendMessage(tabs[0].id, {message: "download-stopped"})
-      })
+      if (request.href) {
+        chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
+          chrome.tabs.sendMessage(tabs[0].id, {message: "clear-spinner", href: request.href})
+        })
+      } else {
+        chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
+          chrome.tabs.sendMessage(tabs[0].id, {message: "download-stopped", id: request.id})
+        })
+      }
     }
 
     if (request.message === "set-state") {
