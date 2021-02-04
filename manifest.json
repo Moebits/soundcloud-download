@@ -26,5 +26,10 @@
      "webNavigation",
      "storage"
      ],
-     "web_accessible_resources": ["assets/*"]
+     "web_accessible_resources": ["assets/*"],
+     "browser_specific_settings": {
+        "gecko": {
+            "id": "{3c7e16e0-d027-48ee-a9b4-97abaf51b8fd}"
+        }
+    }
   }
