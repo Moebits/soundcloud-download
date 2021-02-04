@@ -121,6 +121,8 @@ const track = async () => {
     const id = `sc-button-id-${Math.floor(Math.random() * 100)}`
     buttons.classList.add(id)
     if (window.location.href.includes("/sets")) {
+        removeButtons()
+        button = appendButton(buttons)
         window.removeEventListener("scroll", scrollListener)
         return playlist(button, buttons, id)
     }
