@@ -168,6 +168,7 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
     if (request.message === "update-state") {
         if (request.state === "off") {
             removeButtons()
+            window.removeEventListener("scroll", scrollListener)
         } else {
             main()
         }
