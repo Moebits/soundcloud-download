@@ -98,8 +98,8 @@ const scrollListener = () => {
 }
 
 const track = async () => {
-    if (arrayIncludes(window.location.href, ["/discover", "/messages", "/you"])) return
-    if (arrayIncludes(window.location.href, ["/stream", "/search", "/likes"])) {
+    if (arrayIncludes(window.location.href, ["/messages", "/you"])) return
+    if (arrayIncludes(window.location.href, ["/discover", "/stream", "/search", "/likes"])) {
         scrollListener()
         return window.addEventListener("scroll", scrollListener)
     }
@@ -182,9 +182,9 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
     } else if (request.message === "clear-spinner") {
         const buttonGroups = document.querySelectorAll(".soundActions.sc-button-toolbar")
         buttonGroups.forEach((g) => {
-            const parent = g.parentElement.parentElement.parentElement
-            const a = parent.querySelector(".soundTitle__title")
-            if (a.href === request.href) {
+            let parent = g.parentElement.parentElement.parentElement
+            let a = parent.querySelector(".soundTitle__title")
+            if (a?.href === request.href) {
                 clearButton(g)
                 let button = null
                 let type = true
