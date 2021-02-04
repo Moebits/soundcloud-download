@@ -132,12 +132,14 @@ const track = async () => {
         const href = `https://soundcloud.com/${urlBit}`
         return user(button, buttons, id, href)
     }
+    removeButtons()
+    button = appendButton(buttons)
+    window.removeEventListener("scroll", scrollListener)
     button.onclick = async () => {
         const track = await parseHTML(window.location.href)
         chrome.runtime.sendMessage({message: "download-track", track, id})
         appendSpinner(buttons)
     }
-    window.removeEventListener("scroll", scrollListener)
 }
 
 const main = () => {
