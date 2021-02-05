@@ -9,6 +9,16 @@ const arrayIncludes = (string, array) => {
     return false
 }
 
+const removeButtons = () => {
+    document.querySelectorAll(".sc-download-button").forEach((b) => b.remove())
+    document.querySelectorAll(".sc-download-spinner-container").forEach((b) => b.remove())
+}
+
+const clearButton = (buttonGroup) => {
+    buttonGroup.querySelector(".sc-download-button")?.remove()
+    buttonGroup.querySelector(".sc-download-spinner-container")?.remove()
+}
+
 const appendButton = (buttonGroup, small) => {
     if (!buttonGroup) buttonGroup = document.querySelector(".sc-button-group")
     clearButton(buttonGroup)
@@ -99,10 +109,6 @@ const scrollListener = () => {
 
 const track = async () => {
     if (arrayIncludes(window.location.href, ["/messages", "/you"])) return
-    if (arrayIncludes(window.location.href, ["/discover", "/stream", "/search", "/likes"])) {
-        scrollListener()
-        return window.addEventListener("scroll", scrollListener)
-    }
     const duplicate = document.querySelector(".sc-download-button")
     let button = duplicate
     let buttons = document.querySelector(".sc-button-group")
@@ -111,21 +117,25 @@ const track = async () => {
         buttons = document.querySelector(".sc-button-group")
     }
     if (!buttons) return
-    if (!button) button = appendButton(buttons)
     let urlBit = window.location.href.match(/(?<=soundcloud.com\/)(.*)(?<!\/)$/)?.[0]
     urlBit = urlBit.replace("/popular-tracks", "").replace("/tracks", "").replace("/albums", "").replace("/sets", "").replace("/reposts", "")
     if (window.location.href === `https://soundcloud.com/${urlBit}/sets`) {
         scrollListener()
         return window.addEventListener("scroll", scrollListener)
     }
-    const id = `sc-button-id-${Math.floor(Math.random() * 100)}`
-    buttons.classList.add(id)
     if (window.location.href.includes("/sets")) {
         removeButtons()
         button = appendButton(buttons)
         window.removeEventListener("scroll", scrollListener)
         return playlist(button, buttons, id)
     }
+    if (arrayIncludes(window.location.href, ["/discover", "/stream", "/search", "/likes"])) {
+        scrollListener()
+        return window.addEventListener("scroll", scrollListener)
+    }
+    const id = `sc-button-id-${Math.floor(Math.random() * 100)}`
+    buttons.classList.add(id)
+    if (!button) button = appendButton(buttons)
     if (!urlBit.includes("/")) {
         scrollListener()
         window.addEventListener("scroll", scrollListener)
@@ -142,37 +152,21 @@ const track = async () => {
     }
 }
 
-const main = () => {
-    setTimeout(track, 100)
-    chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
-        if (request.message == "history-change") {   
-            chrome.storage.sync.get("state", (result) => {
-                if (!result || result.state === "on") {
-                    chrome.runtime.sendMessage({message: "set-state", state: "on"})
-                    setTimeout(track, 100)
-                }
-            })
-        }
-    })
-}
-
-const removeButtons = () => {
-    document.querySelectorAll(".sc-download-button").forEach((b) => b.remove())
-    document.querySelectorAll(".sc-download-spinner-container").forEach((b) => b.remove())
-}
-
-const clearButton = (buttonGroup) => {
-    buttonGroup.querySelector(".sc-download-button")?.remove()
-    buttonGroup.querySelector(".sc-download-spinner-container")?.remove()
-}
-
 chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
+    if (request.message == "history-change") {   
+        chrome.storage.sync.get("state", (result) => {
+            if (!result || result.state === "on") {
+                chrome.runtime.sendMessage({message: "set-state", state: "on"})
+                setTimeout(track, 100)
+            }
+        })
+    }
     if (request.message === "update-state") {
         if (request.state === "off") {
             removeButtons()
             window.removeEventListener("scroll", scrollListener)
         } else {
-            main()
+            setTimeout(track, 100)
         }
     } else if (request.message === "download-stopped") {
         if (request.id) {
@@ -211,10 +205,4 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
     }
 })
 
-chrome.storage.sync.get("state", (result) => {
-    if (!result || result.state === "on") {
-        chrome.runtime.sendMessage({message: "set-state", state: "on"})
-        main()
-    }
-})
-    
+setTimeout(track, 100)
