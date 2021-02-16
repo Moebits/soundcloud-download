@@ -19,7 +19,7 @@ const clearButton = (buttonGroup) => {
     buttonGroup.querySelector(".sc-download-spinner-container")?.remove()
 }
 
-const appendButton = (buttonGroup, small) => {
+const appendButton = (buttonGroup, small, parentGuest) => {
     if (!buttonGroup) buttonGroup = document.querySelector(".sc-button-group")
     clearButton(buttonGroup)
     const button = document.createElement("button")
@@ -37,13 +37,17 @@ const appendButton = (buttonGroup, small) => {
     text.innerText = "Download"
     img.src = chrome.extension.getURL("assets/dl-icon.png")
     button.setAttribute("title", "Download")
-    buttonGroup.appendChild(button)
+    if (parentGuest) {
+        parentGuest.parentNode.insertBefore(button, parentGuest.nextSibling)
+    } else {
+        buttonGroup.appendChild(button)
+    }
     button.appendChild(img)
     button.appendChild(text)
     return button
 }
 
-const appendSpinner = (buttonGroup, type) => {
+const appendSpinner = (buttonGroup, type, parentGuest) => {
     if (!buttonGroup) buttonGroup = document.querySelector(".sc-button-group")
     clearButton(buttonGroup)
     const div = document.createElement("div")
@@ -52,7 +56,11 @@ const appendSpinner = (buttonGroup, type) => {
     if (type === "tiny") div.classList.add("sc-download-spinner-small")
     img.classList.add("sc-download-spinner")
     img.src = chrome.extension.getURL("assets/loading.gif")
-    buttonGroup.appendChild(div)
+    if (parentGuest) {
+        parentGuest.parentNode.insertBefore(div, parentGuest.nextSibling)
+    } else {
+        buttonGroup.appendChild(div)
+    }
     div.appendChild(img)
     return div
 }
@@ -63,11 +71,11 @@ const parseHTML = async (url) => {
     return json[`${json.length - 1}`].data[0]
 }
 
-const playlist = (button, group, id) => {
+const playlist = (button, group, id, parentGuest) => {
     button.onclick = async () => {
         const playlist = await parseHTML(window.location.href)
         chrome.runtime.sendMessage({message: "download-playlist", id, playlist})
-        appendSpinner(group)
+        appendSpinner(group, false, parentGuest)
     }
 }
 
@@ -108,7 +116,7 @@ const scrollListener = () => {
 }
 
 const track = async () => {
-    if (arrayIncludes(window.location.href, ["/messages", "/you"])) return
+    if (arrayIncludes(window.location.href, ["/messages", "/you"]) && !window.location.href.includes("history")) return
     const duplicate = document.querySelector(".sc-download-button")
     let button = duplicate
     let buttons = document.querySelector(".sc-button-group")
@@ -124,12 +132,21 @@ const track = async () => {
         return window.addEventListener("scroll", scrollListener)
     }
     if (window.location.href.includes("/sets")) {
+        const id = `sc-button-id-${Math.floor(Math.random() * 100)}`
+        buttons = document.querySelector(".systemPlaylistDetails__controls")
+        const nodes = document.querySelectorAll(".systemPlaylistDetails__button")
+        let parentGuest = nodes[nodes.length- 1]
+        if (!buttons) {
+            buttons = document.querySelector(".sc-button-group")
+            parentGuest = null
+        }
+        buttons.classList.add(id)
         removeButtons()
-        button = appendButton(buttons)
+        button = appendButton(buttons, false, parentGuest)
         window.removeEventListener("scroll", scrollListener)
-        return playlist(button, buttons, id)
+        return playlist(button, buttons, id, parentGuest)
     }
-    if (arrayIncludes(window.location.href, ["/discover", "/stream", "/search", "/likes"])) {
+    if (arrayIncludes(window.location.href, ["/discover", "/stream", "/search", "/likes"]) || window.location.href.includes("history")) {
         scrollListener()
         return window.addEventListener("scroll", scrollListener)
     }
@@ -153,9 +170,9 @@ const track = async () => {
 }
 
 chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
-    if (request.message == "history-change") {   
+    if (request.message == "history-change") {  
         chrome.storage.sync.get("state", (result) => {
-            if (!result || result.state === "on") {
+            if (!result?.state || result.state === "on") {
                 chrome.runtime.sendMessage({message: "set-state", state: "on"})
                 setTimeout(track, 100)
             }

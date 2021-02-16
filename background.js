@@ -35,11 +35,29 @@ chrome.webRequest.onSendHeaders.addListener((details) => {
   }
 }, {urls: ["https://*.soundcloud.com/*"]})
 
+const downloadM3U = async (url, title) => {
+  const m3u = await fetch(url).then((r) => r.text())
+  const urls = m3u.match(/(http).*?(?=\s)/gm)
+  let crunker = new Crunker.default({sampleRate: 48000})
+  const buffers = await crunker.fetchAudio(...urls)
+  const merged = await crunker.concatAudio(buffers)
+  const output = await crunker.export(merged, "audio/mp3")
+  await crunker.download(output.blob, title)
+  return null
+}
+
 const getDownloadURL = async (track, album) => {
-    let url = track.media.transcodings[1].url
+    let url = track.media.transcodings.find((t) => t.format.mime_type === "audio/mpeg" && t.format.protocol === "progressive")?.url
+    if (!url) {
+      url = track.media.transcodings.find((t) => t.format.mime_type === "audio/mpeg" && t.format.protocol === "hls").url
+      url += url.includes("secret_token") ? `&client_id=${clientID}` : `?client_id=${clientID}`
+      const m3u = await fetch(url).then((r) => r.json()).then((m) => m.url)
+      return downloadM3U(m3u, track.title)
+    }
     url += url.includes("secret_token") ? `&client_id=${clientID}` : `?client_id=${clientID}`
     const mp3 = await fetch(url).then((r) => r.json()).then((m) => m.url)
-    const imageBuffer = await fetch(track.artwork_url).then((r) => r.arrayBuffer())
+    let artwork = track.artwork_url ? track.artwork_url : track.user.avatar_url
+    const imageBuffer = await fetch(artwork).then((r) => r.arrayBuffer())
     const arrayBuffer = await fetch(mp3).then((r) => r.arrayBuffer())
     const writer = new ID3Writer(arrayBuffer)
     writer.setFrame("TIT2", track.title)
@@ -78,7 +96,7 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
     if (request.message === "download-track") {
       const track = request.track
       const url = await getDownloadURL(track)
-      chrome.downloads.download({url, filename: `${track.title}.mp3`, conflictAction: "overwrite"})
+      if (url) chrome.downloads.download({url, filename: `${track.title}.mp3`, conflictAction: "overwrite"})
       if (request.href) {
         chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
           chrome.tabs.sendMessage(tabs[0].id, {message: "clear-spinner", href: request.href})
@@ -100,7 +118,7 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
       }
       const urlArray = await Promise.all(trackArray.map((t) => getDownloadURL(t)))
       for (let i = 0; i < urlArray.length; i++) {
-        chrome.downloads.download({url: urlArray[i], filename: `${trackArray[i].title}.mp3`, conflictAction: "overwrite"})
+        if (urlArray[i]) chrome.downloads.download({url: urlArray[i], filename: `${trackArray[i].title}.mp3`, conflictAction: "overwrite"})
       }
       chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
         chrome.tabs.sendMessage(tabs[0].id, {message: "download-stopped", id: request.id})
@@ -114,7 +132,7 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
       }
       const urlArray = await Promise.all(playlist.tracks.map((t) => getDownloadURL(t, playlist.title)))
       for (let i = 0; i < urlArray.length; i++) {
-        chrome.downloads.download({url: urlArray[i], filename: `${playlist.tracks[i].title}.mp3`, conflictAction: "overwrite"})
+        if (urlArray[i]) chrome.downloads.download({url: urlArray[i], filename: `${playlist.tracks[i].title}.mp3`, conflictAction: "overwrite"})
       }
       if (request.href) {
         chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
