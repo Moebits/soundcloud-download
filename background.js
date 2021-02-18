@@ -67,7 +67,7 @@ const getDownloadURL = async (track, album) => {
         .setFrame("TCON", [track.genre])
         .setFrame("COMM", {
           description: "Description",
-          text: track.description,
+          text: track.description ?? "",
           language: "eng"
         })
         .setFrame("APIC", {
@@ -96,7 +96,7 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
     if (request.message === "download-track") {
       const track = request.track
       const url = await getDownloadURL(track)
-      if (url) chrome.downloads.download({url, filename: `${track.title}.mp3`, conflictAction: "overwrite"})
+      if (url) chrome.downloads.download({url, filename: `${track.title.replace(/:/g, "")}.mp3`, conflictAction: "overwrite"})
       if (request.href) {
         chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
           chrome.tabs.sendMessage(tabs[0].id, {message: "clear-spinner", href: request.href})
@@ -118,7 +118,7 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
       }
       const urlArray = await Promise.all(trackArray.map((t) => getDownloadURL(t)))
       for (let i = 0; i < urlArray.length; i++) {
-        if (urlArray[i]) chrome.downloads.download({url: urlArray[i], filename: `${trackArray[i].title}.mp3`, conflictAction: "overwrite"})
+        if (urlArray[i]) chrome.downloads.download({url: urlArray[i], filename: `${trackArray[i].title.replace(/:/g, "")}.mp3`, conflictAction: "overwrite"})
       }
       chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
         chrome.tabs.sendMessage(tabs[0].id, {message: "download-stopped", id: request.id})
@@ -132,7 +132,7 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
       }
       const urlArray = await Promise.all(playlist.tracks.map((t) => getDownloadURL(t, playlist.title)))
       for (let i = 0; i < urlArray.length; i++) {
-        if (urlArray[i]) chrome.downloads.download({url: urlArray[i], filename: `${playlist.tracks[i].title}.mp3`, conflictAction: "overwrite"})
+        if (urlArray[i]) chrome.downloads.download({url: urlArray[i], filename: `${playlist.tracks[i].title.replace(/:/g, "")}.mp3`, conflictAction: "overwrite"})
       }
       if (request.href) {
         chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
