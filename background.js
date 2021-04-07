@@ -57,6 +57,7 @@ const getDownloadURL = async (track, album) => {
     url += url.includes("secret_token") ? `&client_id=${clientID}` : `?client_id=${clientID}`
     const mp3 = await fetch(url).then((r) => r.json()).then((m) => m.url)
     let artwork = track.artwork_url ? track.artwork_url : track.user.avatar_url
+    artwork = artwork.replace("-large", "-t500x500")
     const imageBuffer = await fetch(artwork).then((r) => r.arrayBuffer())
     const arrayBuffer = await fetch(mp3).then((r) => r.arrayBuffer())
     const writer = new ID3Writer(arrayBuffer)
