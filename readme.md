@@ -11,6 +11,7 @@ This is a simple extension that adds a download button to Soundcloud pages.
 - Download all of a user's tracks (user page)
 - Download all tracks in a playlist (playlist page)
 - Download tracks/playlists on the search page
+- Download the song cover art images
 - Adds metadata such as song title and cover art
 
 Sometimes you may need to refresh the page in order for the button to show up.
