@@ -1,4 +1,5 @@
 let extensionEnabled = true
+let coverArt = false
 let trackURL = ""
 let userURL = ""
 let playlistURL = ""
@@ -85,19 +86,33 @@ const getDownloadURL = async (track, album) => {
     return writer.getURL()
 }
 
+const getArtURL = (track) => {
+  let artwork = track.artwork_url ? track.artwork_url : track.user.avatar_url
+  artwork = artwork.replace("-large", "-t500x500")
+  return artwork
+}
+
 const setIcon = () => {
   if (extensionEnabled === true) {
-    chrome.browserAction.setIcon({path: "assets/icon.png"})
+    if (coverArt) {
+      chrome.browserAction.setIcon({path: "assets/icon-pink.png"})
+    } else {
+      chrome.browserAction.setIcon({path: "assets/icon.png"})
+    }
   } else {
-    chrome.browserAction.setIcon({path: "assets/icon-off.png"})
+    if (coverArt) {
+      chrome.browserAction.setIcon({path: "assets/icon-off-pink.png"})
+    } else {
+      chrome.browserAction.setIcon({path: "assets/icon-off.png"})
+    }
   }
 }
 
 chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
     if (request.message === "download-track") {
       const track = request.track
-      const url = await getDownloadURL(track)
-      const filename = `${track.title.replace(/[^a-z0-9_-\u3000-\u303f\u3040-\u309f\u30a0-\u30ff\uff00-\uff9f\u4e00-\u9faf\u3400-\u4dbf【】()\[\] ]/gi, "").replace(/ +/g, " ")}.mp3`.trim()
+      const url = coverArt ? getArtURL(track) : await getDownloadURL(track)
+      const filename = `${track.title.replace(/[^a-z0-9_-\u3000-\u303f\u3040-\u309f\u30a0-\u30ff\uff00-\uff9f\u4e00-\u9faf\u3400-\u4dbf【】()\[\] ]/gi, "").replace(/ +/g, " ")}.${coverArt ? "jpg" : "mp3"}`.trim()
       if (url) chrome.downloads.download({url, filename, conflictAction: "overwrite"})
       if (request.href) {
         chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
@@ -118,9 +133,9 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
         user = await fetch(`${user.next_href}&client_id=${clientID}`).then(r => r.json())
         trackArray.push(...user.collection)
       }
-      const urlArray = await Promise.all(trackArray.map((t) => getDownloadURL(t)))
+      const urlArray = await Promise.all(trackArray.map((t) => coverArt ? getArtURL(t) : getDownloadURL(t)))
       for (let i = 0; i < urlArray.length; i++) {
-        const filename = `${trackArray[i].title.replace(/[^a-z0-9_-\u3000-\u303f\u3040-\u309f\u30a0-\u30ff\uff00-\uff9f\u4e00-\u9faf\u3400-\u4dbf【】()\[\] ]/gi, "").replace(/ +/g, " ")}.mp3`.trim()
+        const filename = `${trackArray[i].title.replace(/[^a-z0-9_-\u3000-\u303f\u3040-\u309f\u30a0-\u30ff\uff00-\uff9f\u4e00-\u9faf\u3400-\u4dbf【】()\[\] ]/gi, "").replace(/ +/g, " ")}.${coverArt ? "jpg" : "mp3"}`.trim()
         if (urlArray[i]) chrome.downloads.download({url: urlArray[i], filename, conflictAction: "overwrite"})
       }
       chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
@@ -133,9 +148,9 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
       for (let i = 0; i < playlist.tracks.length; i++) {
         if (!playlist.tracks[i].media) playlist.tracks[i] = await fetch(`https://api-v2.soundcloud.com/tracks/soundcloud:tracks:${playlist.tracks[i].id}?client_id=${clientID}`).then(r => r.json())
       }
-      const urlArray = await Promise.all(playlist.tracks.map((t) => getDownloadURL(t, playlist.title)))
+      const urlArray = await Promise.all(playlist.tracks.map((t) => coverArt ? getArtURL(t) : getDownloadURL(t, playlist.title)))
       for (let i = 0; i < urlArray.length; i++) {
-        const filename = `${playlist.tracks[i].title.replace(/[^a-z0-9_-\u3000-\u303f\u3040-\u309f\u30a0-\u30ff\uff00-\uff9f\u4e00-\u9faf\u3400-\u4dbf【】()\[\] ]/gi, "").replace(/ +/g, " ")}.mp3`.trim()
+        const filename = `${playlist.tracks[i].title.replace(/[^a-z0-9_-\u3000-\u303f\u3040-\u309f\u30a0-\u30ff\uff00-\uff9f\u4e00-\u9faf\u3400-\u4dbf【】()\[\] ]/gi, "").replace(/ +/g, " ")}.${coverArt ? "jpg" : "mp3"}`.trim()
         if (urlArray[i]) chrome.downloads.download({url: urlArray[i], filename, conflictAction: "overwrite"})
       }
       if (request.href) {
@@ -150,10 +165,12 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
     }
 
     if (request.message === "set-state") {
+      console.log(request)
       extensionEnabled = request.state === "on" ? true : false
+      coverArt = request.coverArt === "on" ? true : false
       setIcon()
       chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
-        chrome.tabs.sendMessage(tabs[0].id, {message: "update-state", state: request.state})
+        chrome.tabs.sendMessage(tabs[0].id, {message: "update-state", state: request.state, coverArt: request.coverArt})
       })
     }
 })

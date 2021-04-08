@@ -1,3 +1,5 @@
+let coverArt = false
+
 const timeout = async (ms) => {
     return new Promise((resolve) => setTimeout(resolve, ms))
 }
@@ -9,13 +11,22 @@ const arrayIncludes = (string, array) => {
     return false
 }
 
+const scButton = (noPeriod) => {
+    if (noPeriod) return coverArt ? "sc-download-button-pink" : "sc-download-button"
+    return coverArt ? ".sc-download-button-pink" : ".sc-download-button"
+}
+
+const scText = () => {
+    return coverArt ? "sc-download-text-pink" : "sc-download-text"
+}
+
 const removeButtons = () => {
-    document.querySelectorAll(".sc-download-button").forEach((b) => b.remove())
+    document.querySelectorAll(scButton()).forEach((b) => b.remove())
     document.querySelectorAll(".sc-download-spinner-container").forEach((b) => b.remove())
 }
 
 const clearButton = (buttonGroup) => {
-    buttonGroup.querySelector(".sc-download-button")?.remove()
+    buttonGroup.querySelector(scButton())?.remove()
     buttonGroup.querySelector(".sc-download-spinner-container")?.remove()
 }
 
@@ -26,8 +37,8 @@ const appendButton = (buttonGroup, small, parentGuest) => {
     const img = document.createElement("img")
     const text = document.createElement("span")
     img.classList.add("sc-download-img")
-    button.classList.add("sc-download-button")
-    text.classList.add("sc-download-text")
+    button.classList.add(scButton(true))
+    text.classList.add(scText())
     if (small) {
         img.classList.add("sc-download-img-small")
         button.classList.add("sc-download-button-small")
@@ -35,7 +46,7 @@ const appendButton = (buttonGroup, small, parentGuest) => {
         if (small === "tiny") text.classList.add("sc-download-text-hide")
     }
     text.innerText = "Download"
-    img.src = chrome.extension.getURL("assets/dl-icon.png")
+    img.src = coverArt ? chrome.extension.getURL("assets/dl-icon-pink.png") : chrome.extension.getURL("assets/dl-icon.png")
     button.setAttribute("title", "Download")
     if (parentGuest) {
         parentGuest.parentNode.insertBefore(button, parentGuest.nextSibling)
@@ -55,7 +66,7 @@ const appendSpinner = (buttonGroup, type, parentGuest) => {
     div.classList.add("sc-download-spinner-container")
     if (type === "tiny") div.classList.add("sc-download-spinner-small")
     img.classList.add("sc-download-spinner")
-    img.src = chrome.extension.getURL("assets/loading.gif")
+    img.src = coverArt ? chrome.extension.getURL("assets/loading-pink.gif") : chrome.extension.getURL("assets/loading.gif")
     if (parentGuest) {
         parentGuest.parentNode.insertBefore(div, parentGuest.nextSibling)
     } else {
@@ -90,7 +101,7 @@ const user = (button, group, id, href) => {
 const scrollListener = () => {
     const buttonGroups = document.querySelectorAll(".soundActions.sc-button-toolbar")
         buttonGroups.forEach((g) => {
-            const duplicate = g.querySelector(".sc-download-button, .sc-download-spinner-container")
+            const duplicate = g.querySelector(`${scButton()}, .sc-download-spinner-container`)
             if (duplicate) return
             const parent = g.parentElement.parentElement.parentElement
             let button = null
@@ -117,7 +128,7 @@ const scrollListener = () => {
 
 const track = async () => {
     if (arrayIncludes(window.location.href, ["/messages", "/you"]) && !window.location.href.includes("history")) return
-    const duplicate = document.querySelector(".sc-download-button")
+    const duplicate = document.querySelector(scButton())
     let button = duplicate
     let buttons = document.querySelector(".sc-button-group")
     if (!buttons) {
@@ -171,9 +182,9 @@ const track = async () => {
 
 chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
     if (request.message == "history-change") {  
-        chrome.storage.sync.get("state", (result) => {
-            if (!result?.state || result.state === "on") {
-                chrome.runtime.sendMessage({message: "set-state", state: "on"})
+        chrome.storage.sync.get("info", (result) => {
+            if (!result?.info?.state || result.info.state === "on") {
+                chrome.runtime.sendMessage({message: "set-state", state: "on", coverArt: result?.info?.coverArt === "on" ? "on" : "off"})
                 setTimeout(track, 100)
             }
         })
@@ -184,6 +195,13 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
             window.removeEventListener("scroll", scrollListener)
         } else {
             setTimeout(track, 100)
+        }
+        if (request.coverArt === "on") {
+            if (coverArt === false) removeButtons()
+            coverArt = true
+        } else {
+            if (coverArt === true) removeButtons()
+            coverArt = false
         }
     } else if (request.message === "download-stopped") {
         if (request.id) {
@@ -222,4 +240,7 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
     }
 })
 
-setTimeout(track, 100)
+chrome.storage.sync.get("info", (result) => {
+    coverArt = result?.info?.coverArt === "on" ? true : false
+    setTimeout(track, 100)
+})

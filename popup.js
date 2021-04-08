@@ -1,19 +1,41 @@
 const checkBox = document.querySelector(".sc-ext-enable-checkbox")
-chrome.storage.sync.get("state", (result) => {
-    if (result.state === "off") checkBox.checked = false
-    if (checkBox.checked) {
-        chrome.runtime.sendMessage({message: "set-state", state: "on"})
+const artCheckBox = document.querySelector(".sc-ext-art-checkbox")
+const text = document.querySelectorAll(".sc-ext-text")
+
+const state = () => {
+    return {state: checkBox.checked ? "on" : "off", coverArt: artCheckBox.checked ? "on" : "off"}
+}
+
+chrome.storage.sync.get("info", (result) => {
+    if (result.info?.state === "off") checkBox.checked = false
+    if (result.info?.coverArt === "on") artCheckBox.checked = true
+    if (artCheckBox.checked) {
+        artCheckBox.classList.add("pink-filter")
+        checkBox.classList.add("pink-filter")
+        text.forEach((t) => t.classList.add("pink-text"))
     } else {
-        chrome.runtime.sendMessage({message: "set-state", state: "off"})
+        artCheckBox.classList.remove("pink-filter")
+        checkBox.classList.remove("pink-filter")
+        text.forEach((t) => t.classList.remove("pink-text"))
     }
+    chrome.runtime.sendMessage({message: "set-state", ...state()})
 })
 
 checkBox.onclick = () => {
-    if (checkBox.checked) {
-        chrome.runtime.sendMessage({message: "set-state", state: "on"})
-        chrome.storage.sync.set({state: "on"})
+    chrome.storage.sync.set({info: state()})
+    chrome.runtime.sendMessage({message: "set-state", ...state()})
+}
+
+artCheckBox.onclick = () => {
+    if (artCheckBox.checked) {
+        artCheckBox.classList.add("pink-filter")
+        checkBox.classList.add("pink-filter")
+        text.forEach((t) => t.classList.add("pink-text"))
     } else {
-        chrome.runtime.sendMessage({message: "set-state", state: "off"})
-        chrome.storage.sync.set({state: "off"})
+        artCheckBox.classList.remove("pink-filter")
+        checkBox.classList.remove("pink-filter")
+        text.forEach((t) => t.classList.remove("pink-text"))
     }
+    chrome.storage.sync.set({info: state()})
+    chrome.runtime.sendMessage({message: "set-state", ...state()})
 }
