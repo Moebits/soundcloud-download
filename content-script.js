@@ -242,5 +242,7 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
 
 chrome.storage.sync.get("info", (result) => {
     coverArt = result?.info?.coverArt === "on" ? true : false
-    setTimeout(track, 100)
+    if (!result?.info?.state || result.info.state === "on") {
+        setTimeout(track, 100)
+    }
 })
