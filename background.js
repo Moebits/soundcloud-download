@@ -36,6 +36,10 @@ chrome.webRequest.onSendHeaders.addListener((details) => {
   }
 }, {urls: ["https://*.soundcloud.com/*"]})
 
+const clean = (text) => {
+  return text?.replace(/[^a-z0-9_-\u3000-\u303f\u3040-\u309f\u30a0-\u30ff\uff00-\uff9f\u4e00-\u9faf\u3400-\u4dbf【】()\[\]&?!#. ]/gi, "").replace(/ +/g, " ") ?? ""
+}
+
 const downloadM3U = async (url, title) => {
   const m3u = await fetch(url).then((r) => r.text())
   const urls = m3u.match(/(http).*?(?=\s)/gm)
@@ -112,7 +116,7 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
     if (request.message === "download-track") {
       const track = request.track
       const url = coverArt ? getArtURL(track) : await getDownloadURL(track)
-      const filename = `${track.title.replace(/[^a-z0-9_-\u3000-\u303f\u3040-\u309f\u30a0-\u30ff\uff00-\uff9f\u4e00-\u9faf\u3400-\u4dbf【】()\[\] ]/gi, "").replace(/ +/g, " ")}.${coverArt ? "jpg" : "mp3"}`.trim()
+      const filename = `${clean(track.title)}.${coverArt ? "jpg" : "mp3"}`.trim()
       if (url) chrome.downloads.download({url, filename, conflictAction: "overwrite"})
       if (request.href) {
         chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
@@ -135,8 +139,9 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
       }
       const urlArray = await Promise.all(trackArray.map((t) => coverArt ? getArtURL(t) : getDownloadURL(t)))
       for (let i = 0; i < urlArray.length; i++) {
-        const filename = `${trackArray[i].title.replace(/[^a-z0-9_-\u3000-\u303f\u3040-\u309f\u30a0-\u30ff\uff00-\uff9f\u4e00-\u9faf\u3400-\u4dbf【】()\[\] ]/gi, "").replace(/ +/g, " ")}.${coverArt ? "jpg" : "mp3"}`.trim()
-        if (urlArray[i]) chrome.downloads.download({url: urlArray[i], filename, conflictAction: "overwrite"})
+        const filename = `${clean(trackArray[i].title)}.${coverArt ? "jpg" : "mp3"}`.trim()
+        console.log(`${clean(request.user.username)}/${filename}`)
+        if (urlArray[i]) chrome.downloads.download({url: urlArray[i], filename: `${clean(request.user.username)}/${filename}`, conflictAction: "overwrite"})
       }
       chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
         chrome.tabs.sendMessage(tabs[0].id, {message: "download-stopped", id: request.id})
@@ -150,8 +155,8 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
       }
       const urlArray = await Promise.all(playlist.tracks.map((t) => coverArt ? getArtURL(t) : getDownloadURL(t, playlist.title)))
       for (let i = 0; i < urlArray.length; i++) {
-        const filename = `${playlist.tracks[i].title.replace(/[^a-z0-9_-\u3000-\u303f\u3040-\u309f\u30a0-\u30ff\uff00-\uff9f\u4e00-\u9faf\u3400-\u4dbf【】()\[\] ]/gi, "").replace(/ +/g, " ")}.${coverArt ? "jpg" : "mp3"}`.trim()
-        if (urlArray[i]) chrome.downloads.download({url: urlArray[i], filename, conflictAction: "overwrite"})
+        const filename = `${clean(playlist.tracks[i].title)}.${coverArt ? "jpg" : "mp3"}`.trim()
+        if (urlArray[i]) chrome.downloads.download({url: urlArray[i], filename: `${clean(playlist.title)}/${filename}`, conflictAction: "overwrite"})
       }
       if (request.href) {
         chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
