@@ -37,7 +37,7 @@ chrome.webRequest.onSendHeaders.addListener((details) => {
 }, {urls: ["https://*.soundcloud.com/*"]})
 
 const clean = (text) => {
-  return text?.replace(/[^a-z0-9_-\u3000-\u303f\u3040-\u309f\u30a0-\u30ff\uff00-\uff9f\u4e00-\u9faf\u3400-\u4dbf【】()\[\]&?!#. ]/gi, "").replace(/ +/g, " ") ?? ""
+  return text?.replace(/[^a-z0-9_-\u3000-\u303f\u3040-\u309f\u30a0-\u30ff\uff00-\uff9f\u4e00-\u9faf\u3400-\u4dbf【】()\[\]&!#. ]/gi, "").replace(/ +/g, " ") ?? ""
 }
 
 const downloadM3U = async (url, title) => {
@@ -47,24 +47,24 @@ const downloadM3U = async (url, title) => {
   const buffers = await crunker.fetchAudio(...urls)
   const merged = await crunker.concatAudio(buffers)
   const output = await crunker.export(merged, "audio/mp3")
-  await crunker.download(output.blob, title)
-  return null
+  return output.url
 }
 
 const getDownloadURL = async (track, album) => {
     let url = track.media.transcodings.find((t) => t.format.mime_type === "audio/mpeg" && t.format.protocol === "progressive")?.url
     if (!url) {
-      url = track.media.transcodings.find((t) => t.format.mime_type === "audio/mpeg" && t.format.protocol === "hls").url
+      url = track.media.transcodings.find((t) => t.format.mime_type === "audio/mpeg" && t.format.protocol === "hls")?.url
+      if (!url) return
       url += url.includes("secret_token") ? `&client_id=${clientID}` : `?client_id=${clientID}`
       const m3u = await fetch(url).then((r) => r.json()).then((m) => m.url)
       return downloadM3U(m3u, track.title)
     }
     url += url.includes("secret_token") ? `&client_id=${clientID}` : `?client_id=${clientID}`
     const mp3 = await fetch(url).then((r) => r.json()).then((m) => m.url)
+    const arrayBuffer = await fetch(mp3).then((r) => r.arrayBuffer())
     let artwork = track.artwork_url ? track.artwork_url : track.user.avatar_url
     artwork = artwork.replace("-large", "-t500x500")
     const imageBuffer = await fetch(artwork).then((r) => r.arrayBuffer())
-    const arrayBuffer = await fetch(mp3).then((r) => r.arrayBuffer())
     const writer = new ID3Writer(arrayBuffer)
     writer.setFrame("TIT2", track.title)
         .setFrame("TPE1", [track.user.username])
@@ -140,7 +140,6 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
       const urlArray = await Promise.all(trackArray.map((t) => coverArt ? getArtURL(t) : getDownloadURL(t)))
       for (let i = 0; i < urlArray.length; i++) {
         const filename = `${clean(trackArray[i].title)}.${coverArt ? "jpg" : "mp3"}`.trim()
-        console.log(`${clean(request.user.username)}/${filename}`)
         if (urlArray[i]) chrome.downloads.download({url: urlArray[i], filename: `${clean(request.user.username)}/${filename}`, conflictAction: "overwrite"})
       }
       chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
@@ -170,7 +169,6 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
     }
 
     if (request.message === "set-state") {
-      console.log(request)
       extensionEnabled = request.state === "on" ? true : false
       coverArt = request.coverArt === "on" ? true : false
       setIcon()
