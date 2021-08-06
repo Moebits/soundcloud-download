@@ -17,7 +17,7 @@ This is a simple extension that adds a download button to Soundcloud pages.
 Sometimes you may need to refresh the page in order for the button to show up.
 
 #### Bugs/Feature Requests:
-You can open an issue on my github repository here: https://github.com/Tenpi/soundcloud-extension
+You can open an issue on my github repository here: https://github.com/Tenpi/soundcloud-download
 
 #### Extension Pages:
 Chrome: https://chrome.google.com/webstore/detail/soundcloud-download/alonjekfomgihkmbejlpnohliidafdep
