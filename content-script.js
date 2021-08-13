@@ -78,8 +78,9 @@ const appendSpinner = (buttonGroup, type, parentGuest) => {
 
 const parseHTML = async (url) => {
     const html = await fetch(url).then((r) => r.text())
-    const json = JSON.parse(html.match(/(?<=,)\[{(.*?)(?=\);<)/gm)[0])
-    return json[`${json.length - 1}`].data[0]
+    const json = JSON.parse(html.match(/(\[{)(.*)(?=;)/gm)[0])
+    const parsed = json[json.length - 1].data
+    return parsed
 }
 
 const playlist = (button, group, id, parentGuest) => {
