@@ -86,7 +86,11 @@ const parseHTML = async (url) => {
 const playlist = (button, group, id, parentGuest) => {
     button.onclick = async () => {
         const playlist = await parseHTML(window.location.href)
-        chrome.runtime.sendMessage({message: "download-playlist", id, playlist})
+        if (playlist.kind === "track") {
+            chrome.runtime.sendMessage({message: "download-track", id, track: playlist})
+        } else {
+            chrome.runtime.sendMessage({message: "download-playlist", id, playlist})
+        }
         appendSpinner(group, false, parentGuest)
     }
 }
