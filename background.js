@@ -5,6 +5,17 @@ let userURL = ""
 let playlistURL = ""
 let playlistLock = false
 let clientID = ""
+let trackAuth = ""
+let authToken = ""
+
+chrome.webRequest.onBeforeRequest.addListener((details) => {
+  if (details.url.includes("soundcloud.com/me")) {
+    if (!details.requestBody?.raw) return
+    const decoder = new TextDecoder("utf-8")
+    const json = JSON.parse(decoder.decode(details.requestBody.raw[0].bytes))
+    authToken = json.auth_token
+  }
+}, {urls: ["https://*.soundcloud.com/*"]}, ["requestBody"])
 
 chrome.webRequest.onSendHeaders.addListener((details) => {
   if (details.url.includes("https://api-v2.soundcloud.com/tracks/")) {
@@ -34,13 +45,18 @@ chrome.webRequest.onSendHeaders.addListener((details) => {
     playlistURL = `https://api-v2.soundcloud.com/playlists/${id}?client_id=${clientID}`
     playlistLock = true
   }
+  if (details.url.includes("https://api-v2.soundcloud.com/media")) {
+    const url = details.url.split("?")
+    const params = new URLSearchParams(`?${url[1]}`)
+    trackAuth = params.get("track_authorization")
+  }
 }, {urls: ["https://*.soundcloud.com/*"]})
 
 const clean = (text) => {
   return text?.replace(/[^a-z0-9_-\u3000-\u303f\u3040-\u309f\u30a0-\u30ff\uff00-\uff9f\u4e00-\u9faf\u3400-\u4dbf【】()\[\]&!#. ]/gi, "").replace(/~/g, "").replace(/ +/g, " ") ?? ""
 }
 
-const downloadM3U = async (url, title) => {
+const downloadM3U = async (url) => {
   const m3u = await fetch(url).then((r) => r.text())
   const urls = m3u.match(/(http).*?(?=\s)/gm)
   let crunker = new Crunker.default({sampleRate: 48000})
@@ -54,10 +70,10 @@ const getDownloadURL = async (track, album) => {
     let url = track.media.transcodings.find((t) => t.format.mime_type === "audio/mpeg" && t.format.protocol === "progressive")?.url
     if (!url) {
       url = track.media.transcodings.find((t) => t.format.mime_type === "audio/mpeg" && t.format.protocol === "hls")?.url
-      if (!url) return
       url += url.includes("secret_token") ? `&client_id=${clientID}` : `?client_id=${clientID}`
-      const m3u = await fetch(url).then((r) => r.json()).then((m) => m.url)
-      return downloadM3U(m3u, track.title)
+      if (trackAuth) url += `&track_authorization=${trackAuth}`
+      const m3u = await fetch(url, {headers: {"Authorization": `OAuth ${authToken}`}}).then((r) => r.json()).then((m) => m.url)
+      return downloadM3U(m3u)
     }
     url += url.includes("secret_token") ? `&client_id=${clientID}` : `?client_id=${clientID}`
     const mp3 = await fetch(url).then((r) => r.json()).then((m) => m.url)
