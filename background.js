@@ -149,6 +149,8 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
       const trackArray = []
       let user = await fetch(`https://api-v2.soundcloud.com/users/${request.user.id}/tracks?client_id=${clientID}&limit=100`).then(r => r.json())
       trackArray.push(...user.collection)
+      let reposts = await fetch(`https://api-v2.soundcloud.com/stream/users/${request.user.id}/reposts?client_id=${clientID}&limit=100`).then(r => r.json())
+      trackArray.push(...reposts.collection.map(repost => repost.track))
       while (user.next_href) {
         user = await fetch(`${user.next_href}&client_id=${clientID}`).then(r => r.json())
         trackArray.push(...user.collection)
