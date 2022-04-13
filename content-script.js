@@ -141,7 +141,8 @@ const track = async () => {
         buttons = document.querySelector(".sc-button-group")
     }
     if (!buttons) return
-    let urlBit = window.location.href.match(/(?<=soundcloud.com\/)(.*)(?<!\/)$/)?.[0]
+    let urlBit = window.location.href.match(/(soundcloud.com\/)(.*)$/)?.[0].replace("soundcloud.com/", "")
+    if (urlBit.endsWith("/")) urlBit = urlBit.slice(0, -1)
     urlBit = urlBit.replace("/popular-tracks", "").replace("/tracks", "").replace("/albums", "").replace("/sets", "").replace("/reposts", "")
     if (window.location.href === `https://soundcloud.com/${urlBit}/sets`) {
         scrollListener()

@@ -21,6 +21,7 @@
     },
     "permissions": [
      "https://*.soundcloud.com/*",
+     "tabs",
      "webRequest",
      "downloads",
      "webNavigation",

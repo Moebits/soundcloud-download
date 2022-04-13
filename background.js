@@ -20,7 +20,7 @@ chrome.webRequest.onBeforeRequest.addListener((details) => {
 chrome.webRequest.onSendHeaders.addListener((details) => {
   if (details.url.includes("https://api-v2.soundcloud.com/tracks/")) {
     const url = details.url.split("?")
-    const id = url[0].match(/(?<=tracks\/)(.*?)(?=\/)/)?.[0]
+    const id = url[0].match(/(tracks\/)(.*?)(?=\/)/)?.[0].replace("tracks/", "")
     if (!id) return
     const params = new URLSearchParams(`?${url[1]}`)
     clientID = params.get("client_id")
@@ -32,13 +32,13 @@ chrome.webRequest.onSendHeaders.addListener((details) => {
   }
   if (details.url.includes("https://api-v2.soundcloud.com/users/soundcloud:users")) {
     const url = details.url.split("?")
-    const id = details.url.match(/(?<=soundcloud:users:)(.*?)(?=\/)/)?.[0]
+    const id = details.url.match(/(soundcloud:users:)(.*?)(?=\/)/)?.[0].replace("soundcloud:users:", "")
     const params = new URLSearchParams(`?${url[1]}`)
     clientID = params.get("client_id")
     userURL = `https://api-v2.soundcloud.com/users/${id}/tracks?client_id=${clientID}&limit=100`
   }
   if (!playlistLock && details.url.includes("https://api-v2.soundcloud.com/playlists")) {
-    const id = details.url.match(/(?<=playlists\/)(.*?)(?=\/|\?)/)?.[0]
+    const id = details.url.match(/(playlists\/)(.*?)(?=\/|\?)/)?.[0].replace("playlists/", "")
     const url = details.url.split("?")
     const params = new URLSearchParams(`?${url[1]}`)
     clientID = params.get("client_id")
@@ -131,9 +131,16 @@ const setIcon = () => {
 chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
     if (request.message === "download-track") {
       const track = request.track
+        console.log(track)
       const url = coverArt ? getArtURL(track) : await getDownloadURL(track)
       const filename = `${clean(track.title)}.${coverArt ? "jpg" : "mp3"}`.trim()
-      if (url) chrome.downloads.download({url, filename, conflictAction: "overwrite"})
+        if (url) {
+            if (navigator.userAgent.indexOf("Safari") != -1) {
+                chrome.tabs.create({url})
+            } else {
+                chrome.downloads.download({url, filename, conflictAction: "overwrite"})
+            }
+        }
       if (request.href) {
         chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
           chrome.tabs.sendMessage(tabs[0].id, {message: "clear-spinner", href: request.href})
