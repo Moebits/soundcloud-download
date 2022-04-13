@@ -131,6 +131,10 @@
     filter: hue-rotate(160deg) brightness(240%);
 }
 
+.sc-ext-playlists-checkbox {
+    filter: hue-rotate(160deg) brightness(240%);
+}
+
 .pink-text {
     color: #ff20f4;
 }
