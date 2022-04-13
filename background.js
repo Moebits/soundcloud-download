@@ -1,6 +1,7 @@
 let extensionEnabled = true
 let coverArt = false
 let reposts = false
+let playlistsForUser = false
 let trackURL = ""
 let userURL = ""
 let playlistURL = ""
@@ -129,6 +130,31 @@ const setIcon = () => {
   }
 }
 
+const downloadPlaylist = async (request, playlist, pathPrefix) => {
+  for (let i = 0; i < playlist.tracks.length; i++) {
+    if (!playlist.tracks[i].media) playlist.tracks[i] = await fetch(`https://api-v2.soundcloud.com/tracks/soundcloud:tracks:${playlist.tracks[i].id}?client_id=${clientID}`).then(r => r.json())
+  }
+  for (let i = 0; i < playlist.tracks.length; i++) {
+    try {
+      const url = coverArt ? getArtURL(playlist.tracks[i]) : await getDownloadURL(playlist.tracks[i], playlist.title)
+      let filename = `${clean(playlist.tracks[i].title)}.${coverArt ? "jpg" : "mp3"}`.trim()
+      if (url) chrome.downloads.download({url, filename: `${pathPrefix}${clean(playlist.title)}/${filename}`, conflictAction: "overwrite"})
+    } catch (e) {
+      console.log(e)
+      continue
+    }
+  }
+  if (request.href) {
+    chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
+      chrome.tabs.sendMessage(tabs[0].id, {message: "clear-spinner", href: request.href})
+    })
+  } else {
+    chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
+      chrome.tabs.sendMessage(tabs[0].id, {message: "download-stopped", id: request.id})
+    })
+  }
+}
+
 chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
     if (request.message === "download-track") {
       const track = request.track
@@ -172,44 +198,40 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
           continue
         }
       }
+      if (playlistsForUser) {
+        try {
+          const playlistArray = []
+          let playlists = await fetch(`https://api-v2.soundcloud.com/users/${request.user.id}/playlists?client_id=${clientID}&limit=100`).then(r => r.json())
+          playlistArray.push(...playlists.collection)
+          while (playlists.next_href) {
+            playlists = await fetch(`https://api-v2.soundcloud.com/users/${request.user.id}/playlists?client_id=${clientID}&limit=100`).then(r => r.json())
+            playlistArray.push(...playlists.collection)
+          }
+          for (let playlist of playlistArray) {
+            await downloadPlaylist(request, playlist, `${clean(request.user.username)}/`)
+          }
+        }
+        catch (e) {
+          console.log(e)
+        }
+      }      
       chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
         chrome.tabs.sendMessage(tabs[0].id, {message: "download-stopped", id: request.id})
       })
     }
 
     if (request.message === "download-playlist") {
-      const playlist = request.playlist
-      for (let i = 0; i < playlist.tracks.length; i++) {
-        if (!playlist.tracks[i].media) playlist.tracks[i] = await fetch(`https://api-v2.soundcloud.com/tracks/soundcloud:tracks:${playlist.tracks[i].id}?client_id=${clientID}`).then(r => r.json())
-      }
-      for (let i = 0; i < playlist.tracks.length; i++) {
-        try {
-          const url = coverArt ? getArtURL(playlist.tracks[i]) : await getDownloadURL(playlist.tracks[i], playlist.title)
-          const filename = `${clean(playlist.tracks[i].title)}.${coverArt ? "jpg" : "mp3"}`.trim()
-          if (url) chrome.downloads.download({url, filename: `${clean(playlist.title)}/${filename}`, conflictAction: "overwrite"})
-        } catch (e) {
-          console.log(e)
-          continue
-        }
-      }
-      if (request.href) {
-        chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
-          chrome.tabs.sendMessage(tabs[0].id, {message: "clear-spinner", href: request.href})
-        })
-      } else {
-        chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
-          chrome.tabs.sendMessage(tabs[0].id, {message: "download-stopped", id: request.id})
-        })
-      }
+      await downloadPlaylist(request, request.playlist)
     }
 
     if (request.message === "set-state") {
       extensionEnabled = request.state === "on" ? true : false
       coverArt = request.coverArt === "on" ? true : false
       reposts = request.reposts === "on" ? true : false
+      playlistsForUser = request.playlistsForUser === "on" ? true : false
       setIcon()
       chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
-        chrome.tabs.sendMessage(tabs[0].id, {message: "update-state", state: request.state, coverArt: request.coverArt, reposts: request.reposts})
+        chrome.tabs.sendMessage(tabs[0].id, {message: "update-state", state: request.state, coverArt: request.coverArt, reposts: request.reposts, playlistsForUser: request.playlistsForUser})
       })
     }
 })
