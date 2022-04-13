@@ -1,7 +1,7 @@
 let extensionEnabled = true
 let coverArt = false
 let reposts = false
-let playlistsForUser = false
+let playlists = false
 let trackURL = ""
 let userURL = ""
 let playlistURL = ""
@@ -198,13 +198,13 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
           continue
         }
       }
-      if (playlistsForUser) {
+      if (playlists) {
         try {
           const playlistArray = []
           let playlists = await fetch(`https://api-v2.soundcloud.com/users/${request.user.id}/playlists?client_id=${clientID}&limit=100`).then(r => r.json())
           playlistArray.push(...playlists.collection)
           while (playlists.next_href) {
-            playlists = await fetch(`https://api-v2.soundcloud.com/users/${request.user.id}/playlists?client_id=${clientID}&limit=100`).then(r => r.json())
+            playlists = await fetch(`${playlists.next_href}&client_id=${clientID}`).then(r => r.json())
             playlistArray.push(...playlists.collection)
           }
           for (let playlist of playlistArray) {
@@ -228,10 +228,10 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
       extensionEnabled = request.state === "on" ? true : false
       coverArt = request.coverArt === "on" ? true : false
       reposts = request.reposts === "on" ? true : false
-      playlistsForUser = request.playlistsForUser === "on" ? true : false
+      playlists = request.playlists === "on" ? true : false
       setIcon()
       chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
-        chrome.tabs.sendMessage(tabs[0].id, {message: "update-state", state: request.state, coverArt: request.coverArt, reposts: request.reposts, playlistsForUser: request.playlistsForUser})
+        chrome.tabs.sendMessage(tabs[0].id, {message: "update-state", state: request.state, coverArt: request.coverArt, reposts: request.reposts, playlists: request.playlists})
       })
     }
 })

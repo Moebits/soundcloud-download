@@ -9,7 +9,7 @@ const state = () => {
         state: checkBox.checked ? "on" : "off", 
         coverArt: artCheckBox.checked ? "on" : "off", 
         reposts: repostCheckBox.checked ? "on" : "off",
-        playlistsForUser: playlistsCheckBox.checked ? "on" : "off"
+        playlists: playlistsCheckBox.checked ? "on" : "off"
     }
 }
 
@@ -17,7 +17,7 @@ chrome.storage.sync.get("info", (result) => {
     if (result.info?.state === "off") checkBox.checked = false
     if (result.info?.coverArt === "on") artCheckBox.checked = true
     if (result.info?.reposts === "on") repostCheckBox.checked = true
-    if (result.info?.playlistsForUser === "on") playlistsCheckBox.checked = true
+    if (result.info?.playlists === "on") playlistsCheckBox.checked = true
     if (artCheckBox.checked) {
         artCheckBox.classList.add("pink-filter")
         checkBox.classList.add("pink-filter")
