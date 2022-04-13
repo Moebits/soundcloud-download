@@ -97,7 +97,7 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    width: 100px;
+    width: max-content;
 }
 
 .sc-ext-row-container:first-child {
@@ -124,6 +124,10 @@
 }
 
 .sc-ext-art-checkbox {
+    filter: hue-rotate(160deg) brightness(240%);
+}
+
+.sc-ext-repost-checkbox {
     filter: hue-rotate(160deg) brightness(240%);
 }
 
