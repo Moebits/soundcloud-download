@@ -68,7 +68,7 @@ const downloadM3U = async (url) => {
   return output.url
 }
 
-const getDownloadURL = async (track, album) => {
+const getDownloadURL = async (track, album, trackNumber) => {
     let url = track.media.transcodings.find((t) => t.format.mime_type === "audio/mpeg" && t.format.protocol === "progressive")?.url
     if (!url) {
       url = track.media.transcodings.find((t) => t.format.mime_type === "audio/mpeg" && t.format.protocol === "hls")?.url
@@ -104,6 +104,9 @@ const getDownloadURL = async (track, album) => {
       writer.setFrame("TALB", album)
             .setFrame("TPE2", track.user.username)
     }
+    if (trackNumber) {
+      writer.setFrame("TRCK", String(trackNumber))
+    }
     writer.addTag()
     return writer.getURL()
 }
@@ -136,7 +139,7 @@ const downloadPlaylist = async (request, playlist, pathPrefix) => {
   }
   for (let i = 0; i < playlist.tracks.length; i++) {
     try {
-      const url = coverArt ? getArtURL(playlist.tracks[i]) : await getDownloadURL(playlist.tracks[i], playlist.title)
+      const url = coverArt ? getArtURL(playlist.tracks[i]) : await getDownloadURL(playlist.tracks[i], playlist.title, i + 1)
       let filename = `${clean(playlist.tracks[i].title)}.${coverArt ? "jpg" : "mp3"}`.trim()
       if (url) chrome.downloads.download({url, filename: `${pathPrefix}${clean(playlist.title)}/${filename}`, conflictAction: "overwrite"})
     } catch (e) {
@@ -190,7 +193,7 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
       }
       for (let i = 0; i < trackArray.length; i++) {
         try {
-          const url = coverArt ? getArtURL(trackArray[i]) : await getDownloadURL(trackArray[i])
+          const url = coverArt ? getArtURL(trackArray[i]) : await getDownloadURL(trackArray[i], null, i + 1)
           const filename = `${clean(trackArray[i].title)}.${coverArt ? "jpg" : "mp3"}`.trim()
           if (url) chrome.downloads.download({url, filename: `${clean(request.user.username)}/${filename}`, conflictAction: "overwrite"})
         } catch (e) {
