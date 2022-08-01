@@ -1,21 +1,15 @@
+:root {
+    --sc-ext-orange: #ff8c20;
+    --sc-ext-pink:   #ff20f4;
+    --sc-ext-color:   var(--sc-ext-orange);
+}
+
 .sc-download-button {
     background-color: transparent;
     display: flex;
     height: 26px;
     padding: 2px 5px;
-    border: 1px solid #ff8c20;
-    border-radius: 3px;
-    justify-content: space-between;
-    align-items: center;
-    margin-left: 3px;
-}
-
-.sc-download-button-pink {
-    background-color: transparent;
-    display: flex;
-    height: 26px;
-    padding: 2px 5px;
-    border: 1px solid #ff20da;
+    border: 1px solid var(--sc-ext-color);
     border-radius: 3px;
     justify-content: space-between;
     align-items: center;
@@ -54,15 +48,7 @@
 }
 
 .sc-download-text {
-    color: #ff8c20;
-    font-family: Interstate, Lucida Grande, Lucida Sans Unicode, Lucida Sans,Garuda, Verdana, Tahoma, sans-serif;
-    font-weight: 100;
-    text-align: center;
-    font-size: 12px;
-}
-
-.sc-download-text-pink {
-    color: #ff20e1;
+    color: var(--sc-ext-color);
     font-family: Interstate, Lucida Grande, Lucida Sans Unicode, Lucida Sans,Garuda, Verdana, Tahoma, sans-serif;
     font-weight: 100;
     text-align: center;
@@ -115,7 +101,7 @@
 }
 
 .sc-ext-text {
-    color: #ff8c20;
+    color: var(--sc-ext-color);
 }
 
 .sc-ext-h1 {
@@ -123,28 +109,4 @@
     color: #ffffff;
     font-weight: bold;
     font-size: 12px;
-}
-
-.sc-ext-enable-checkbox {
-    filter: hue-rotate(160deg) brightness(240%);
-}
-
-.sc-ext-art-checkbox {
-    filter: hue-rotate(160deg) brightness(240%);
-}
-
-.sc-ext-repost-checkbox {
-    filter: hue-rotate(160deg) brightness(240%);
-}
-
-.sc-ext-playlists-checkbox {
-    filter: hue-rotate(160deg) brightness(240%);
-}
-
-.pink-text {
-    color: #ff20f4;
-}
-
-.pink-filter {
-    filter: hue-rotate(100deg) brightness(240%);
 }

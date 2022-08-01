@@ -14,13 +14,8 @@ const state = () => {
     }
 }
 
-function setPink(shouldBePink){
-    artCheckBox.classList.toggle("pink-filter",shouldBePink)
-    checkBox.classList.toggle("pink-filter",shouldBePink)
-    repostCheckBox.classList.toggle("pink-filter",shouldBePink)
-    playlistsCheckBox.classList.toggle("pink-filter",shouldBePink)
-    text.forEach((t) => t.classList.toggle("pink-text",shouldBePink))
-    switches.forEach((s) => s.classList.toggle("pink-slider",shouldBePink))
+function setColorState(pink){
+    document.documentElement.style.setProperty("--sc-ext-color",`var(--sc-ext-${ pink ? "pink" : "orange" })`)
 }
 
 chrome.storage.sync.get("info", (result) => {
@@ -28,7 +23,7 @@ chrome.storage.sync.get("info", (result) => {
     if (result.info?.coverArt === "on") artCheckBox.checked = true
     if (result.info?.reposts === "on") repostCheckBox.checked = true
     if (result.info?.playlists === "on") playlistsCheckBox.checked = true
-    setPink(artCheckBox.checked)
+    setColorState(artCheckBox.checked)
     chrome.runtime.sendMessage({message: "set-state", ...state()})
 })
 
@@ -48,7 +43,11 @@ playlistsCheckBox.onclick = () => {
 }
 
 artCheckBox.onclick = () => {
-    setPink(artCheckBox.checked)
+    setColorState(artCheckBox.checked)
     chrome.storage.sync.set({info: state()})
     chrome.runtime.sendMessage({message: "set-state", ...state()})
 }
+
+setTimeout(function(){
+    document.body.classList.remove("preload"); // stops animations from playing when we open the popup
+},500);
