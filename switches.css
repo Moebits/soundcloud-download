@@ -1,0 +1,72 @@
+/* stolen from w3schools - https://www.w3schools.com/howto/howto_css_switch.asp */
+
+/* The switch - the box around the slider */
+.sc-ext-switch {
+    position: relative;
+    display: inline-block;
+    width: 30px;
+    height: 18px;
+}
+
+/* Hide default HTML checkbox */
+.sc-ext-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+/* The slider */
+.sc-ext-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #aaa;
+    -webkit-transition: transform .2s;
+    transition: transform .2s;
+}
+
+.sc-ext-slider:before {
+    position: absolute;
+    content: "";
+    height: 14px;
+    width: 14px;
+    left: 2px;
+    bottom: 2.5px;
+    background-color: white;
+    -webkit-transition: .2s;
+    transition: .2s;
+}
+
+input:checked + .sc-ext-slider {
+    background-color: #ff8c20;
+}
+
+input:focus + .sc-ext-slider {
+    box-shadow: 0 0 1px #ff8c20;
+}
+
+input:checked + .sc-ext-slider.pink-slider {
+    background-color: #ff20e1;
+}
+
+input:focus + .sc-ext-slider.pink-slider {
+    box-shadow: 0 0 1px #ff20e1;
+}
+
+input:checked + .sc-ext-slider:before {
+    -webkit-transform: translateX(12px);
+    -ms-transform: translateX(12px);
+    transform: translateX(12px);
+}
+
+/* Rounded sliders */
+.sc-ext-slider.round {
+    border-radius: 18px;
+}
+
+.sc-ext-slider.round:before {
+    border-radius: 50%;
+}

@@ -3,25 +3,47 @@
     <head>
         <title>Soundcloud Download</title>
         <link rel="stylesheet" type="text/css" href="styles.css">
+        <link rel="stylesheet" type="text/css" href="switches.css">
     </head>
     <body style="background-color: black;">
         <div class="sc-ext-container">
-            <div class="sc-ext-row-container">
-                <p class="sc-ext-text">Enable?</p>
-                <input type="checkbox" checked class="sc-ext-enable-checkbox">
+
+            <div class="sc-ext-h1">
+                Soundcloud Downloader
             </div>
+
             <div class="sc-ext-row-container">
-                <p class="sc-ext-text">Cover Art?</p>
-                <input type="checkbox" class="sc-ext-art-checkbox">
+                <p class="sc-ext-text">Enable</p>
+                <label class="sc-ext-switch">
+                    <input type="checkbox" checked id="sc-ext-enable-checkbox">
+                    <span class="sc-ext-slider round"></span>
+                </label>
             </div>
+
             <div class="sc-ext-row-container">
-                <p class="sc-ext-text">Include Reposts?</p>
-                <input type="checkbox" class="sc-ext-repost-checkbox">
+                <p class="sc-ext-text">Cover Art Only</p>
+                <label class="sc-ext-switch">
+                    <input type="checkbox" id="sc-ext-art-checkbox">
+                    <span class="sc-ext-slider round"></span>
+                </label>
             </div>
+
             <div class="sc-ext-row-container">
-                <p class="sc-ext-text">Include Playlists?</p>
-                <input type="checkbox" class="sc-ext-playlists-checkbox">
+                <p class="sc-ext-text">Include Reposts</p>
+                <label class="sc-ext-switch">
+                    <input type="checkbox" id="sc-ext-repost-checkbox">
+                    <span class="sc-ext-slider round"></span>
+                </label>
             </div>
+
+            <div class="sc-ext-row-container">
+                <p class="sc-ext-text">Include Playlists</p>
+                <label class="sc-ext-switch">
+                    <input type="checkbox" id="sc-ext-playlists-checkbox">
+                    <span class="sc-ext-slider round"></span>
+                </label>
+            </div>
+
         </div>
         <script src="popup.js"></script>
     </body>

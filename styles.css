@@ -107,7 +107,10 @@
 .sc-ext-row-container {
     display: flex;
     align-items: center;
+    justify-content: space-between;
     height: 10px;
+    width: 100%;
+    padding: 1px 0px;
     margin-top: 10px;
 }
 
@@ -115,8 +118,11 @@
     color: #ff8c20;
 }
 
-.sc-ext-text:hover {
-    color: #ff2020;
+.sc-ext-h1 {
+    font-family: Interstate, Lucida Grande, Lucida Sans Unicode, Lucida Sans,Garuda, Verdana, Tahoma, sans-serif;
+    color: #ffffff;
+    font-weight: bold;
+    font-size: 12px;
 }
 
 .sc-ext-enable-checkbox {
@@ -137,10 +143,6 @@
 
 .pink-text {
     color: #ff20f4;
-}
-
-.pink-text:hover {
-    color: #f7217a;
 }
 
 .pink-filter {
