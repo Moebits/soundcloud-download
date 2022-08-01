@@ -1,6 +1,9 @@
 :root {
     --sc-ext-orange: #ff8c20;
     --sc-ext-pink:   #ff20f4;
+}
+
+:root {
     --sc-ext-color:   var(--sc-ext-orange);
 }
 
@@ -101,4 +104,22 @@
     color: #ffffff;
     font-weight: bold;
     font-size: 12px;
+    margin-bottom: -9px;
+}
+
+.sc-ext-h2 {
+    width: 100%;
+    color: #ffffff;
+    font-size: 12px;
+    margin: 14px 0 -3px 0;
+    align-self: left;
+    display: flex;
+}
+
+.sc-ext-h2:before, .sc-ext-h2:after {
+    content: '';
+    flex: 1;
+    margin: auto 6px;
+    height: 0px;
+    border-top: solid var(--sc-ext-color) 1px;
 }
