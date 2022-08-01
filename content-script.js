@@ -12,12 +12,11 @@ const arrayIncludes = (string, array) => {
 }
 
 const scButton = (noPeriod) => {
-    if (noPeriod) return coverArt ? "sc-download-button-pink" : "sc-download-button"
-    return coverArt ? ".sc-download-button-pink" : ".sc-download-button"
+    return noPeriod ? "sc-download-button" : ".sc-download-button"
 }
 
 const scText = () => {
-    return coverArt ? "sc-download-text-pink" : "sc-download-text"
+    return "sc-download-text"
 }
 
 const removeButtons = () => {
@@ -132,6 +131,7 @@ const scrollListener = () => {
 }
 
 const track = async () => {
+    document.documentElement.style.setProperty("--sc-ext-color",`var(--sc-ext-${ coverArt ? "pink" : "orange" })`)
     if (arrayIncludes(window.location.href, ["/messages", "/you"]) && !window.location.href.includes("history")) return
     const duplicate = document.querySelector(scButton())
     let button = duplicate

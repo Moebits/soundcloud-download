@@ -29,14 +29,6 @@
     filter: brightness(75%) hue-rotate(-20deg) saturate(150%);
 }
 
-.sc-download-button-pink:focus {
-    outline: none;
-}
-
-.sc-download-button-pink:hover {
-    filter: brightness(75%) hue-rotate(-20deg) saturate(150%);
-}
-
 .sc-download-img {
     height: 18px;
     width: auto;
