@@ -85,24 +85,24 @@ const getDownloadURL = async (track, album, trackNumber) => {
         const imageBuffer = await fetch(artwork).then((r) => r.arrayBuffer())
         const writer = new ID3Writer(arrayBuffer)
         writer.setFrame("TIT2", track.title)
-                .setFrame("TPE1", [track.user.username])
-                .setFrame("TLEN", track.duration)
-                .setFrame("TYER", new Date(track.created_at).getFullYear())
-                .setFrame("TCON", [track.genre])
-                .setFrame("COMM", {
-                    description: "Description",
-                    text: track.description ?? "",
-                    language: "eng"
-                })
-                .setFrame("APIC", {
-                    type: 3,
-                    data: imageBuffer,
-                    description: track.title,
-                    useUnicodeEncoding: false
+            .setFrame("TPE1", [track.user.username])
+            .setFrame("TLEN", track.duration)
+            .setFrame("TYER", new Date(track.created_at).getFullYear())
+            .setFrame("TCON", [track.genre])
+            .setFrame("COMM", {
+                description: "Description",
+                text: track.description ?? "",
+                language: "eng"
+            })
+            .setFrame("APIC", {
+                type: 3,
+                data: imageBuffer,
+                description: track.title,
+                useUnicodeEncoding: false
             })
         if (album) {
             writer.setFrame("TALB", album)
-                        .setFrame("TPE2", track.user.username)
+                .setFrame("TPE2", track.user.username)
         }
         if (trackNumber) {
             writer.setFrame("TRCK", String(trackNumber))
