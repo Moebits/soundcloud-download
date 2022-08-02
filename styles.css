@@ -101,9 +101,9 @@
 
 .sc-ext-h1 {
     font-family: Interstate, Lucida Grande, Lucida Sans Unicode, Lucida Sans,Garuda, Verdana, Tahoma, sans-serif;
-    color: #ffffff;
+    color: var(--sc-ext-color);
     font-weight: bold;
-    font-size: 12px;
+    font-size: 13px;
     margin-bottom: -9px;
 }
 
