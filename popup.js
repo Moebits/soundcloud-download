@@ -1,8 +1,9 @@
-const checkBox = document.querySelector(".sc-ext-enable-checkbox")
-const artCheckBox = document.querySelector(".sc-ext-art-checkbox")
-const repostCheckBox = document.querySelector(".sc-ext-repost-checkbox")
-const playlistsCheckBox = document.querySelector(".sc-ext-playlists-checkbox")
+const checkBox = document.getElementById("sc-ext-enable-checkbox")
+const artCheckBox = document.getElementById("sc-ext-art-checkbox")
+const repostCheckBox = document.getElementById("sc-ext-repost-checkbox")
+const playlistsCheckBox = document.getElementById("sc-ext-playlists-checkbox")
 const text = document.querySelectorAll(".sc-ext-text")
+const switches = document.querySelectorAll(".sc-ext-slider")
 
 const state = () => {
     return {
@@ -13,24 +14,16 @@ const state = () => {
     }
 }
 
+function setColorState(pink){
+    document.documentElement.style.setProperty("--sc-ext-color",`var(--sc-ext-${ pink ? "pink" : "orange" })`)
+}
+
 chrome.storage.sync.get("info", (result) => {
     if (result.info?.state === "off") checkBox.checked = false
     if (result.info?.coverArt === "on") artCheckBox.checked = true
     if (result.info?.reposts === "on") repostCheckBox.checked = true
     if (result.info?.playlists === "on") playlistsCheckBox.checked = true
-    if (artCheckBox.checked) {
-        artCheckBox.classList.add("pink-filter")
-        checkBox.classList.add("pink-filter")
-        repostCheckBox.classList.add("pink-filter")
-        playlistsCheckBox.classList.add("pink-filter")
-        text.forEach((t) => t.classList.add("pink-text"))
-    } else {
-        artCheckBox.classList.remove("pink-filter")
-        checkBox.classList.remove("pink-filter")
-        repostCheckBox.classList.remove("pink-filter")
-        playlistsCheckBox.classList.remove("pink-filter")
-        text.forEach((t) => t.classList.remove("pink-text"))
-    }
+    setColorState(artCheckBox.checked)
     chrome.runtime.sendMessage({message: "set-state", ...state()})
 })
 
@@ -50,19 +43,11 @@ playlistsCheckBox.onclick = () => {
 }
 
 artCheckBox.onclick = () => {
-    if (artCheckBox.checked) {
-        artCheckBox.classList.add("pink-filter")
-        checkBox.classList.add("pink-filter")
-        repostCheckBox.classList.add("pink-filter")
-        playlistsCheckBox.classList.add("pink-filter")
-        text.forEach((t) => t.classList.add("pink-text"))
-    } else {
-        artCheckBox.classList.remove("pink-filter")
-        checkBox.classList.remove("pink-filter")
-        repostCheckBox.classList.remove("pink-filter")
-        playlistsCheckBox.classList.remove("pink-filter")
-        text.forEach((t) => t.classList.remove("pink-text"))
-    }
+    setColorState(artCheckBox.checked)
     chrome.storage.sync.set({info: state()})
     chrome.runtime.sendMessage({message: "set-state", ...state()})
 }
+
+setTimeout(function(){
+    document.body.classList.remove("preload"); // stops animations from playing when we open the popup
+},500);
