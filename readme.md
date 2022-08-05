@@ -23,8 +23,8 @@ You can open an issue on my github repository here: https://github.com/Tenpi/sou
 Chrome: https://chrome.google.com/webstore/detail/soundcloud-download/alonjekfomgihkmbejlpnohliidafdep
 Firefox: https://addons.mozilla.org/en-US/firefox/addon/sc-download/
 
-Chrome Store Removal:
+#### Chrome Store Removal:
 
-Chrome updated their policies and my extension violates them for offering "unauthorized access to content on https://www.soundcloud.com". To use this extension on Chrome you will have to download the zip file and load is as an unpacked extension.
+Chrome updated their policies and my extension violates them for offering "unauthorized access to content on https://www.soundcloud.com". To use this extension on Chrome you will have to download the zip file and load it as an unpacked extension.
 
 https://github.com/Tenpi/soundcloud-download/releases
