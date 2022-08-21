@@ -224,7 +224,7 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
         }
 
         if (request.message === "download-playlist") {
-            await downloadPlaylist(request, request.playlist)
+            await downloadPlaylist(request, request.playlist, `${clean(request.playlist.user.username)}/`)
         }
 
         if (request.message === "set-state") {
