@@ -17,7 +17,7 @@ This is a simple extension that adds a download button to Soundcloud pages.
 Sometimes you may need to refresh the page in order for the button to show up.
 
 #### Bugs/Feature Requests:
-You can open an issue on my github repository here: https://github.com/Moebits/soundcloud-download
+You can open an issue on my github repository here: https://github.com/Moebytes/soundcloud-download
 
 #### Extension Pages:
 Chrome: https://chrome.google.com/webstore/detail/soundcloud-download/alonjekfomgihkmbejlpnohliidafdep
@@ -27,4 +27,5 @@ Firefox: https://addons.mozilla.org/en-US/firefox/addon/sc-download/
 
 Chrome updated their policies and my extension violates them for offering "unauthorized access to content on https://www.soundcloud.com". To use this extension on Chrome you will have to download the zip file and load it as an unpacked extension.
 
-https://github.com/Moebits/soundcloud-download/releases
+https://github.com/Moebytes/soundcloud-download/releases
+
